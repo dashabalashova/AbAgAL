@@ -37,7 +37,7 @@ def run_experiment(
     results_dir.mkdir(parents=True, exist_ok=True)
 
     # Load dataset
-    df_binding = prepare_ab_ag_dataset(data_path)
+    df_binding = pd.read_csv(data_path, sep='\t')
     df_train = prepare_ab_ag_dataset(df_binding, random_seed=random_seed, error_rate=error_rate)
     df_train = df_final.sample(frac=0.5, random_state=random_seed)
     df_train['AbSeq'] = df_train.AbSlideSeq

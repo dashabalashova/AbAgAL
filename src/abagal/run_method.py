@@ -43,7 +43,7 @@ def run_experiment(
     print("[INFO] Preparing train dataset...")
     df_binding = pd.read_csv(data_path, sep='\t')
     df_train = prepare_ab_ag_dataset(df_binding, random_seed=random_seed, error_rate=error_rate)
-    df_train = df_final.sample(frac=0.5, random_state=random_seed)
+    df_train = df_train.sample(frac=0.5, random_state=random_seed)
     df_train['AbSeq'] = df_train.AbSlideSeq
     df_train['AASeq'] = df_train.apply(lambda row: row.AgSeq + row.AbSeq, axis=1)
 
@@ -59,7 +59,7 @@ def run_experiment(
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     iterations = df_train[df_train.total_split=='train'].AgSeq.drop_duplicates().shape[0] - base_antigens_count
-    print(f"Experiment: {method}, random_state: {random_state}")
+    print(f"Experiment: {method}, random_state: {random_seed}")
 
     print(f"[INFO] Running method '{method}'...")
     start_time = time.time()

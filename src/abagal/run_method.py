@@ -11,6 +11,7 @@ import pandas as pd
 import numpy as np
 import torch
 from tqdm import tqdm
+import time
 
 from abagal.data.prepare_ab_ag_dataset import prepare_ab_ag_dataset
 from abagal.model.methods import AbAgConvArgs, gradient
@@ -28,6 +29,8 @@ def run_experiment(
     sample_frac: float = 0.1,
     results_dir: Path | str = Path(__file__).resolve().parents[2] / 'results',
 ):
+    print(f"[INFO] Starting experiment: method={method}, random_seed={random_seed}, error_rate={error_rate}")
+    
     # Convert to Path
     result_folder = Path(result_folder)
     data_path = Path(data_path)
@@ -37,6 +40,7 @@ def run_experiment(
     results_dir.mkdir(parents=True, exist_ok=True)
 
     # Load dataset
+    print("[INFO] Preparing train dataset...")
     df_binding = pd.read_csv(data_path, sep='\t')
     df_train = prepare_ab_ag_dataset(df_binding, random_seed=random_seed, error_rate=error_rate)
     df_train = df_final.sample(frac=0.5, random_state=random_seed)
@@ -51,11 +55,14 @@ def run_experiment(
     ]
     choices = ['train','testAG','testAB','test',]
     df_train['total_split'] = np.select(conditions, choices)
+    print(f"[INFO] Prepared train dataset: {df_train.shape[0]} rows")
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     iterations = df_train[df_train.total_split=='train'].AgSeq.drop_duplicates().shape[0] - base_antigens_count
     print(f"Experiment: {method}, random_state: {random_state}")
 
+    print(f"[INFO] Running method '{method}'...")
+    start_time = time.time()
     if method == 'random':
         df_res = random_iter(
             dataset=df_train,
@@ -79,6 +86,8 @@ def run_experiment(
         )
     else:
         raise ValueError(f"Unknown method: {method}")
+    elapsed = time.time() - start_time
+    print(f"[INFO] Method '{method}' completed in {elapsed:.2f} seconds")
 
     df_res['ags_number'] = df_res.iter + base_antigens_count
     result_path = results_dir / f'roc_aucs_{method}_{random_seed}.tsv'
@@ -87,4 +96,5 @@ def run_experiment(
 
     return None
 
-run_experiment()
+if __name__ == '__main__':
+    run_experiment()

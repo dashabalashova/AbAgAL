@@ -22,17 +22,14 @@ def run_experiment(
     method: str = 'random',
     random_seed: int = 0,
     error_rate: float = 0.05,
-    result_folder: Path | str = Path(__file__).resolve().parent,
     data_path: Path | str = Path(__file__).resolve().parents[2] / 'data' / 'processed' / 'ab_ag_binding.tsv',
     base_antigens_count: int = 5,
-    exp_cnt: int = 1,
-    sample_frac: float = 0.1,
+    sample_frac: float = 0.5,
     results_dir: Path | str = Path(__file__).resolve().parents[2] / 'results',
 ):
     print(f"[INFO] Starting experiment: method={method}, random_seed={random_seed}, error_rate={error_rate}")
     
     # Convert to Path
-    result_folder = Path(result_folder)
     data_path = Path(data_path)
     results_dir = Path(results_dir)
 
@@ -43,7 +40,7 @@ def run_experiment(
     print("[INFO] Preparing train dataset...")
     df_binding = pd.read_csv(data_path, sep='\t')
     df_train = prepare_ab_ag_dataset(df_binding, random_seed=random_seed, error_rate=error_rate)
-    df_train = df_train.sample(frac=0.5, random_state=random_seed)
+    df_train = df_train.sample(frac=sample_frac, random_state=random_seed)
     df_train['AbSeq'] = df_train.AbSlideSeq
     df_train['AASeq'] = df_train.apply(lambda row: row.AgSeq + row.AbSeq, axis=1)
 

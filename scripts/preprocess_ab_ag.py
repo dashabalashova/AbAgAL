@@ -82,7 +82,7 @@ def prepare_final_df(df: pd.DataFrame, mutation_map: pd.Series) -> pd.DataFrame:
     """Assembles final DataFrame with Ab sequences and binding class."""
     df = df.rename(columns={'CDR3': 'AbCDR3Seq', 'Slide': 'AbSlideSeq'})
     df['AgSeq'] = df['Antigen'].map(mutation_map)
-    df = df.drop_duplicates(['AbSlideSeq', 'AgSeq'])
+    df = df.drop_duplicates(['AbCDR3Seq', 'AgSeq'])
 
     median_energy = df['Energy'].median()
     df['BindClass'] = df['Energy'] <= median_energy
